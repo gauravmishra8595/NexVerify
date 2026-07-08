@@ -1,0 +1,25 @@
+Django==6.0.3
+djangorestframework==3.16.0
+djangorestframework-simplejwt==5.4.0
+django-cors-headers==4.6.0
+python-dotenv==1.0.1
+google-generativeai==0.8.3
+
+# PostgreSQL driver (used in production; project currently runs on sqlite3
+# locally via db.sqlite3, switch DATABASES in config/settings.py when ready)
+psycopg2-binary==2.9.10
+
+# Background jobs (referenced in project goals - not wired up yet)
+celery==5.4.0
+redis==5.2.1
+
+# PDF certificate generation
+reportlab==4.2.5
+qrcode==8.0
+Pillow==11.0.0
+
+# Resume parsing (PDF/DOCX extraction)
+pdfplumber==0.11.4
+python-docx==1.1.2
+
+gunicorn==23.0.0
