@@ -6,7 +6,9 @@ import axios from "axios";
  * browser (different localStorage keys, different 401 redirect target).
  */
 const adminApi = axios.create({
-  baseURL: "http://127.0.0.1:8000/api/admin-panel",
+  baseURL: `${
+    process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api"
+  }/admin-panel`,
   headers: {
     "Content-Type": "application/json",
   },
