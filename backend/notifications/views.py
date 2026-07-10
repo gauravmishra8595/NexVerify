@@ -1,15 +1,14 @@
-from django.shortcuts import render
+import socket
 from django.http import JsonResponse
-from django.core.mail import send_mail
 
 def smtp_test(request):
-    send_mail(
-        subject="SMTP Test",
-        message="Hello from Render",
-        from_email=None,
-        recipient_list=["YOUR_OTHER_EMAIL@gmail.com"],
-        fail_silently=False,
-    )
-
-    return JsonResponse({"status": "success"})
+    try:
+        ip = socket.gethostbyname("smtp.gmail.com")
+        return JsonResponse({
+            "resolved": ip
+        })
+    except Exception as e:
+        return JsonResponse({
+            "error": str(e)
+        }, status=500)
 # Create your views here.
