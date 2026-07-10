@@ -165,11 +165,13 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    os.getenv("FRONTEND_URL"),
+    "http://localhost:3000",
+    "https://nex-verify-1bvk.vercel.app",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    os.getenv("FRONTEND_URL"),
+    "http://localhost:3000",
+    "https://nex-verify-1bvk.vercel.app",
 ]
 AUTH_USER_MODEL = "accounts.User"
 
