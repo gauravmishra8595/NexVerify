@@ -2,7 +2,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from django.http import JsonResponse
+from django.core.mail import send_mail
 from notifications.email_service import EmailSendError, send_otp_email
 
 from .services import (
@@ -66,3 +67,27 @@ class VerifyEmailOTPView(APIView):
         user.save(update_fields=["is_email_verified"])
 
         return Response({"message": "Email verified successfully."}, status=status.HTTP_200_OK)
+
+
+
+
+def smtp_test(request):
+    try:
+        send_mail(
+            subject="SMTP Test",
+            message="Hello from Render!",
+            from_email=None,
+            recipient_list=["ritikmishragm@gmail.com"],  # Replace with an email you can check
+            fail_silently=False,
+        )
+
+        return JsonResponse({
+            "success": True,
+            "message": "Email sent successfully"
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            "success": False,
+            "error": str(e)
+        }, status=500)

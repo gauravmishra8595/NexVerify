@@ -1,5 +1,5 @@
 import logging
-
+import smtplib
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 
@@ -42,28 +42,31 @@ def send_otp_email(*, to_email: str, otp_code: str, purpose_label: str = "Email 
     from .models import NotificationChannel, NotificationLog, NotificationStatus
 
     try:
-        message = EmailMultiAlternatives(
-            subject=subject,
-            body=text_body,
-            from_email=settings.EMAIL_HOST_USER,
-            to=[to_email],
-        )
-        message.attach_alternative(html_body, "text/html")
-        message.send(fail_silently=False)
-    except Exception as exc:
-        logger.exception("Failed to send OTP email to %s", to_email)
-        NotificationLog.objects.create(
-            channel=NotificationChannel.EMAIL,
-            destination=to_email,
-            subject=subject,
-            status=NotificationStatus.FAILED,
-            error_message=str(exc),
-        )
-        raise EmailSendError(str(exc)) from exc
+     logger.info("Preparing OTP email for %s", to_email)
 
-    NotificationLog.objects.create(
-        channel=NotificationChannel.EMAIL,
-        destination=to_email,
+     message = EmailMultiAlternatives(
         subject=subject,
-        status=NotificationStatus.SENT,
+        body=text_body,
+        from_email=settings.EMAIL_HOST_USER,
+        to=[to_email],
     )
+
+     message.attach_alternative(html_body, "text/html")
+
+     logger.info(
+        "Connecting to SMTP server %s:%s",
+        settings.EMAIL_HOST,
+        settings.EMAIL_PORT,
+    )
+
+     message.send(fail_silently=False)
+
+     logger.info("OTP email sent successfully to %s", to_email)
+
+    except smtplib.SMTPException as exc:
+     logger.exception("SMTP Error while sending email")
+     raise EmailSendError(str(exc)) from exc
+
+    except Exception as exc:
+     logger.exception("Unexpected error while sending email")
+     raise EmailSendError(str(exc)) from exc
