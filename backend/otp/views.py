@@ -34,10 +34,10 @@ class SendEmailOTPView(APIView):
 
         try:
             send_otp_email(to_email=email, otp_code=otp_record.otp_code, purpose_label="Email Verification")
-        except EmailSendError:
+        except EmailSendError as e:
             otp_record.delete()
             return Response(
-                {"message": "Failed to send OTP email. Please try again shortly."},
+                {"message": str(e)},
                 status=status.HTTP_502_BAD_GATEWAY,
             )
 
