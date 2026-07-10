@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from django.http import JsonResponse
 from django.core.mail import send_mail
 from notifications.email_service import EmailSendError, send_otp_email
+from django.http import JsonResponse
 
 from .services import (
     OTPVerificationError,
@@ -72,22 +73,6 @@ class VerifyEmailOTPView(APIView):
 
 
 def smtp_test(request):
-    try:
-        send_mail(
-            subject="SMTP Test",
-            message="Hello from Render!",
-            from_email=None,
-            recipient_list=["ritikmishragm@gmail.com"],  # Replace with an email you can check
-            fail_silently=False,
-        )
-
-        return JsonResponse({
-            "success": True,
-            "message": "Email sent successfully"
-        })
-
-    except Exception as e:
-        return JsonResponse({
-            "success": False,
-            "error": str(e)
-        }, status=500)
+    return JsonResponse({
+        "version": "SMTP TEST V2"
+    })
