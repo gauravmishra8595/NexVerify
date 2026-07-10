@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.core.mail import send_mail
 from notifications.email_service import EmailSendError, send_otp_email
 from django.http import JsonResponse
-
+import socket
 from .services import (
     OTPVerificationError,
     create_otp,
@@ -73,6 +73,19 @@ class VerifyEmailOTPView(APIView):
 
 
 def smtp_test(request):
-    return JsonResponse({
-        "version": "SMTP TEST V2"
-    })
+    try:
+        ip = socket.gethostbyname("smtp.gmail.com")
+
+        s = socket.create_connection(("smtp.gmail.com", 587), timeout=10)
+        s.close()
+
+        return JsonResponse({
+            "dns": ip,
+            "connection": "success"
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            "error": str(e),
+            "type": type(e).__name__
+        }, status=500)
