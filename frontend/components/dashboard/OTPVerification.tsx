@@ -130,7 +130,7 @@ export default function OTPVerification() {
         <a href="/" className="mb-8 flex items-center justify-center gap-2">
           <ShieldCheck className="h-5 w-5 text-amber-400" />
           <span className="font-[family-name:--font-geist-sans] text-sm font-semibold text-white">
-            VerifyXY
+          NexVerify
           </span>
         </a>
 
@@ -224,7 +224,7 @@ export default function OTPVerification() {
           )}
         </div>
 
-        {/* Pipeline preview */}
+        {/* Pipeline preview
         <div className="mt-6 rounded-2xl border border-white/10 bg-[#1E2640]/60 p-5">
           <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500">
             What&apos;s next
@@ -246,7 +246,7 @@ export default function OTPVerification() {
               );
             })}
           </div>
-        </div>
+        </div> */}
 
         <p className="mt-5 text-center text-xs text-slate-500">
           OTP verification is required on every login to keep your assessment secure.

@@ -26,7 +26,7 @@ export default function Navbar() {
         <a href={ROUTES.HOME} className="flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-amber-400" />
           <span className="font-[family-name:--font-geist-sans] text-sm font-semibold text-white">
-            VerifyXY
+            Nexverify
           </span>
         </a>
 

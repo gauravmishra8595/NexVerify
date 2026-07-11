@@ -7,7 +7,7 @@ export default function FinalCTA() {
           className="pointer-events-none absolute -top-20 left-1/2 h-64 w-96 -translate-x-1/2 rounded-full bg-amber-500/8 blur-[70px]"
         />
         <h2 className="relative font-[family-name:--font-geist-sans] text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-          Get verified. Get certified. Get hired.
+          Get verified. 
         </h2>
         <p className="relative mx-auto mt-4 max-w-md text-slate-400">
           Two minutes to verify your identity. A few minutes more for a
@@ -17,7 +17,7 @@ export default function FinalCTA() {
           href="/register"
           className="relative mt-8 inline-flex rounded-lg bg-amber-500 px-6 py-3 text-sm font-semibold text-[#111827] transition hover:bg-amber-400"
         >
-          Start verifying — it's free
+          Start verifying 
         </a>
       </div>
     </section>

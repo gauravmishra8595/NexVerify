@@ -27,21 +27,62 @@ export default function DSAQuiz() {
   const hasFinished = useRef(false);
   const preloaded = useRef(false);
 
-  useEffect(() => {
-    generateDSAQuestions()
-      .then((s) => {
+ useEffect(() => {
+  let cancelled = false;
+
+  const loadQuestions = async () => {
+    setLoading(true);
+    setError(null);
+
+    // Try 3 times
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const s = await generateDSAQuestions();
+
+        if (cancelled) return;
+
         setSession(s);
         setTimeLeft(s.time_limit_seconds);
-      })
-      .catch((err) =>
-        setError(
-          err?.response?.status === 403
-            ? "Please verify your email before the assessment."
-            : "Couldn't load questions. Please try again."
-        )
-      )
-      .finally(() => setLoading(false));
-  }, []);
+        setLoading(false);
+        return;
+      } catch (err: any) {
+        console.log("Attempt", attempt, err);
+
+        // Authentication error
+        if (err?.response?.status === 401) {
+          setError("Please login again.");
+          setLoading(false);
+          return;
+        }
+
+        // Email not verified
+        if (err?.response?.status === 403) {
+          setError("Please verify your email before the assessment.");
+          setLoading(false);
+          return;
+        }
+
+        // Wait before retry
+        if (attempt < 3) {
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+        }
+      }
+    }
+
+    if (!cancelled) {
+      setError(
+        "Server is waking up. Please wait a few seconds and try again."
+      );
+      setLoading(false);
+    }
+  };
+
+  loadQuestions();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
   const triggerPreload = () => {
     if (preloaded.current) return;

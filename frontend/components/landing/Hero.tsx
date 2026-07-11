@@ -7,8 +7,8 @@ type StepState = "pending" | "active" | "done";
 
 const STEPS = [
   { label: "Identity verified", sub: "Email OTP confirmed" },
-  { label: "DSA assessment", sub: "10 questions · 87% score" },
-  { label: "Aptitude assessment", sub: "10 questions · 91% score" },
+  { label: "DSA assessment", sub: "25 questions · 87% score" },
+  { label: "Aptitude assessment", sub: "25 questions · 91% score" },
   { label: "Resume analyzed", sub: "ATS score 84/100" },
 ];
 
@@ -62,7 +62,7 @@ function VerificationTicket() {
             allDone ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/8 text-amber-400"
           }`}
         >
-          {allDone ? "Certified" : "In progress"}
+    
         </span>
       </div>
 
@@ -99,9 +99,6 @@ function VerificationTicket() {
 
       <div className="mt-5 flex items-center justify-between border-t border-white/10 pt-4">
         <span className="font-[family-name:--font-geist-mono] text-[11px] text-slate-500">
-          CERT-VXY-2026-8841
-        </span>
-        <span className="font-[family-name:--font-geist-mono] text-[11px] text-slate-500">
           Score: 88
         </span>
       </div>
@@ -134,7 +131,7 @@ export default function Hero() {
           </h1>
 
           <p className="mt-6 max-w-md text-lg leading-relaxed text-slate-400">
-            Every candidate on VerifyXY proves who they are, takes a
+            Every candidate on NexVerify proves who they are, takes a
             real assessment, and gets a detailed skill report with
             ATS analysis and improvement suggestions.
           </p>

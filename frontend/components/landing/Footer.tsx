@@ -26,7 +26,7 @@ export default function Footer() {
           <div className="mb-3 flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-amber-400" />
             <span className="font-[family-name:--font-geist-sans] text-sm font-semibold text-white">
-              VerifyXY
+              NexVerify
             </span>
           </div>
           <p className="max-w-xs text-sm text-slate-500">
@@ -56,7 +56,7 @@ export default function Footer() {
 
       <div className="mx-auto mt-10 max-w-6xl border-t border-white/10 pt-6">
         <p className="text-xs text-slate-600">
-          © {new Date().getFullYear()} VerifyXY. Built as a portfolio project.
+          © {new Date().getFullYear()} NexVerify. Built as a portfolio project.
         </p>
       </div>
     </footer>
