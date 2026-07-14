@@ -186,7 +186,7 @@ EMAIL_BACKEND = os.getenv(
 
 
 EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", 587))
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", 2525))
 EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
@@ -198,7 +198,7 @@ DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL",
     EMAIL_HOST_USER,
 )
-EMAIL_TIMEOUT = 15
+EMAIL_TIMEOUT = 30
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # --- OTP behaviour ---
