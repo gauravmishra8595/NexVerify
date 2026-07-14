@@ -1,21 +1,21 @@
 import logging
 
-import resend
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 
 logger = logging.getLogger(__name__)
-
-resend.api_key = settings.RESEND_API_KEY
 
 
 class EmailSendError(Exception):
     pass
 
 
-def send_otp_email(*, to_email: str, otp_code: str, purpose_label: str = "Email Verification") -> None:
-    """
-    Sends OTP email using Resend API.
-    """
+def send_otp_email(
+    *,
+    to_email: str,
+    otp_code: str,
+    purpose_label: str = "Email Verification",
+) -> None:
 
     subject = "Your NexVerify Verification Code"
 
@@ -49,16 +49,17 @@ def send_otp_email(*, to_email: str, otp_code: str, purpose_label: str = "Email 
     from .models import NotificationChannel, NotificationLog, NotificationStatus
 
     try:
-        logger.info("Sending OTP via Resend to %s", to_email)
+        logger.info("Sending OTP email to %s", to_email)
 
-        resend.Emails.send(
-            {
-                "from": "NexVerify <onboarding@resend.dev>",
-                "to": [to_email],
-                "subject": subject,
-                "html": html_body,
-            }
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body=f"Your OTP is {otp_code}",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[to_email],
         )
+
+        email.attach_alternative(html_body, "text/html")
+        email.send(fail_silently=False)
 
         NotificationLog.objects.create(
             channel=NotificationChannel.EMAIL,
@@ -70,7 +71,7 @@ def send_otp_email(*, to_email: str, otp_code: str, purpose_label: str = "Email 
         logger.info("OTP email sent successfully")
 
     except Exception as exc:
-        logger.exception("Resend email failed")
+        logger.exception("SMTP email failed")
 
         NotificationLog.objects.create(
             channel=NotificationChannel.EMAIL,

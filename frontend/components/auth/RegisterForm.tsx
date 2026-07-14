@@ -79,10 +79,10 @@ export default function RegisterForm() {
         {error && <ErrorBanner message={error} />}
 
         <TextField
-          label="Full name"
+          label="username"
           type="text"
           name="username"
-          placeholder="Jane Doe"
+          placeholder="enteryourUsernamewithoutspace"
           value={form.username}
           onChange={handleChange}
           required

@@ -25,7 +25,7 @@ export default function AuthShell({
         <a href="/" className="mb-8 flex items-center justify-center gap-2">
           <ShieldCheck className="h-5 w-5 text-amber-400" />
           <span className="font-[family-name:--font-geist-sans] text-sm font-semibold text-white">
-            VerifyXY
+            NexVerify
           </span>
         </a>
 
