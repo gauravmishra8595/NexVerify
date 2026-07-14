@@ -1,7 +1,7 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { loginUser } from "@/services/auth";
 import AuthShell from "@/components/ui-custom/AuthShell";
 import { TextField, PasswordField, ErrorBanner, SubmitButton } from "@/components/ui-custom/FormField";
@@ -14,84 +14,34 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
- const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setError(null);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
 
-  // Client-side validation
-  if (!email.trim()) {
-    setError("Email is required.");
-    return;
-  }
+    try {
+      setLoading(true);
 
-  if (!password.trim()) {
-    setError("Password is required.");
-    return;
-  }
+      const response = await loginUser({ email, password });
 
-  try {
-    setLoading(true);
+      // JWTs are stored in localStorage so the axios interceptor
+      // (services/api.ts) can attach them to every request.
+      // User profile data comes from /api/accounts/me/ not from localStorage.
+      localStorage.setItem("access", response.access);
+      localStorage.setItem("refresh", response.refresh);
 
-    const response = await loginUser({
-      email: email.trim(),
-      password,
-    });
-
-    localStorage.setItem("access", response.access);
-    localStorage.setItem("refresh", response.refresh);
-
-    router.push("/dashboard");
-  } catch (err: any) {
-    console.error("Login Error:", err);
-
-    // No response means network error
-    if (!err.response) {
-      setError("Unable to connect to the server. Please check your internet connection.");
-      return;
-    }
-
-    const { status, data } = err.response;
-
-    switch (status) {
-      case 400:
-        setError(
-          data?.detail ||
-            data?.message ||
-            "Please enter a valid email and password."
-        );
-        break;
-
-      case 401:
+      router.push("/dashboard");
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 401) {
         setError("Invalid email or password.");
-        break;
-
-      case 403:
-        setError("Your account is not allowed to sign in.");
-        break;
-
-      case 404:
-        setError("Account not found.");
-        break;
-
-      case 429:
-        setError("Too many login attempts. Please try again later.");
-        break;
-
-      case 500:
-        setError("Server error. Please try again later.");
-        break;
-
-      default:
-        setError(
-          data?.detail ||
-            data?.message ||
-            "Something went wrong. Please try again."
-        );
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   return (
     <AuthShell
       title="Welcome back"
@@ -99,9 +49,9 @@ export default function LoginForm() {
       footer={
         <>
           Don&apos;t have an account?{" "}
-          <Link href="/register" className="text-amber-400 hover:underline">
-         Create one
-          </Link>
+          <a href="/register" className="text-amber-400 hover:underline">
+            Create one
+          </a>
         </>
       }
     >
@@ -133,4 +83,4 @@ export default function LoginForm() {
       </form>
     </AuthShell>
   );
-}
+} 
