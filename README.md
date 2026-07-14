@@ -572,15 +572,19 @@ Add screenshots of the application below.
 
 ### 🏠 Landing Page
 
-
+<p align="center">
+<img src="screenshots/home.png" width="900">
+</p>
 
 ---
 
 ### 🔐 Login Page
 
-> Add Screenshot
 
----
+
+<p align="center">
+<img src="screenshots/Login.png" width="900">
+</p>
 
 ### 📧 OTP Verification
 
