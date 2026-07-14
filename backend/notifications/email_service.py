@@ -10,7 +10,13 @@ logger = logging.getLogger(__name__)
 class EmailSendError(Exception):
     pass
 
+logger.info("SMTP HOST: %s", settings.EMAIL_HOST)
 
+try:
+    ip = socket.gethostbyname(settings.EMAIL_HOST)
+    logger.info("SMTP resolves to: %s", ip)
+except Exception as e:
+    logger.exception("DNS resolution failed")
 logger.info("Resolving SMTP host...")
 logger.info("Resolved IP: %s", socket.gethostbyname(settings.EMAIL_HOST))
 logger.info("EMAIL_HOST=%s", settings.EMAIL_HOST)
