@@ -14,7 +14,6 @@ export interface Candidate {
   id: number;
   username: string;
   email: string;
-  phone_number: string;
   is_email_verified: boolean;
   is_active: boolean;
   role: string;

@@ -2,7 +2,6 @@ export interface RegisterPayload {
   username: string;
   email: string;
   password: string;
-  phone_number: string;
 }
 
 export interface LoginPayload {
@@ -19,7 +18,6 @@ export interface AuthUser {
   id: number;
   username: string;
   email: string;
-  phone_number: string;
   is_email_verified: boolean;
   role: "USER" | "ADMIN";
 }

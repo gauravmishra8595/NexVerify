@@ -11,7 +11,6 @@ export default function RegisterForm() {
   const [form, setForm] = useState({
     username: "",
     email: "",
-    phone_number: "",
     password: "",
     confirmPassword: "",
   });
@@ -44,7 +43,6 @@ export default function RegisterForm() {
       await registerUser({
         username: form.username,
         email: form.email,
-        phone_number: form.phone_number,
         password: form.password,
       });
       window.location.href = "/login";
@@ -98,15 +96,7 @@ export default function RegisterForm() {
           required
         />
 
-        <TextField
-          label="Phone number"
-          type="text"
-          name="phone_number"
-          placeholder="+91XXXXXXXXXX"
-          value={form.phone_number}
-          onChange={handleChange}
-        />
-
+      
         <PasswordField
           label="Password"
           name="password"
