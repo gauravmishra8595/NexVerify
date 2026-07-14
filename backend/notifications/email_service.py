@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -16,6 +17,9 @@ def send_otp_email(
     otp_code: str,
     purpose_label: str = "Email Verification",
 ) -> None:
+    """
+    Sends OTP email using Django SMTP backend.
+    """
 
     subject = "Your NexVerify Verification Code"
 
@@ -46,10 +50,22 @@ def send_otp_email(
     </div>
     """
 
-    from .models import NotificationChannel, NotificationLog, NotificationStatus
+    from .models import (
+        NotificationChannel,
+        NotificationLog,
+        NotificationStatus,
+    )
 
     try:
-        logger.info("Sending OTP email to %s", to_email)
+        logger.info("=" * 60)
+        logger.info("Starting SMTP email send")
+        logger.info("Recipient: %s", to_email)
+
+        logger.info("EMAIL_HOST = %s", settings.EMAIL_HOST)
+        logger.info("EMAIL_PORT = %s", settings.EMAIL_PORT)
+        logger.info("EMAIL_HOST_USER = %s", settings.EMAIL_HOST_USER)
+        logger.info("DEFAULT_FROM_EMAIL = %s", settings.DEFAULT_FROM_EMAIL)
+        logger.info("EMAIL_USE_TLS = %s", settings.EMAIL_USE_TLS)
 
         email = EmailMultiAlternatives(
             subject=subject,
@@ -59,7 +75,13 @@ def send_otp_email(
         )
 
         email.attach_alternative(html_body, "text/html")
-        email.send(fail_silently=False)
+
+        logger.info("Connecting to SMTP server...")
+
+        sent = email.send(fail_silently=False)
+
+        logger.info("SMTP send completed successfully.")
+        logger.info("Email.send() returned: %s", sent)
 
         NotificationLog.objects.create(
             channel=NotificationChannel.EMAIL,
@@ -68,10 +90,16 @@ def send_otp_email(
             status=NotificationStatus.SENT,
         )
 
-        logger.info("OTP email sent successfully")
+        logger.info("NotificationLog saved.")
+        logger.info("=" * 60)
 
     except Exception as exc:
-        logger.exception("SMTP email failed")
+        logger.error("=" * 60)
+        logger.error("SMTP EMAIL FAILED")
+        logger.error("Exception Type: %s", type(exc).__name__)
+        logger.error("Exception Message: %s", str(exc))
+        logger.error(traceback.format_exc())
+        logger.error("=" * 60)
 
         NotificationLog.objects.create(
             channel=NotificationChannel.EMAIL,
@@ -82,3 +110,38 @@ def send_otp_email(
         )
 
         raise EmailSendError(str(exc)) from exc
+
+    # try:
+    #     logger.info("Sending OTP email to %s", to_email)
+
+    #     email = EmailMultiAlternatives(
+    #         subject=subject,
+    #         body=f"Your OTP is {otp_code}",
+    #         from_email=settings.DEFAULT_FROM_EMAIL,
+    #         to=[to_email],
+    #     )
+
+    #     email.attach_alternative(html_body, "text/html")
+    #     email.send(fail_silently=False)
+
+    #     NotificationLog.objects.create(
+    #         channel=NotificationChannel.EMAIL,
+    #         destination=to_email,
+    #         subject=subject,
+    #         status=NotificationStatus.SENT,
+    #     )
+
+    #     logger.info("OTP email sent successfully")
+
+    # except Exception as exc:
+    #     logger.exception("SMTP email failed")
+
+    #     NotificationLog.objects.create(
+    #         channel=NotificationChannel.EMAIL,
+    #         destination=to_email,
+    #         subject=subject,
+    #         status=NotificationStatus.FAILED,
+    #         error_message=str(exc),
+    #     )
+
+    #     raise EmailSendError(str(exc)) from exc
