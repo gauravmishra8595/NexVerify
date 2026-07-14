@@ -207,9 +207,6 @@ export default function CandidateTable() {
                     <div className="font-medium text-white">{candidate.username}</div>
                     <div className="text-xs text-slate-500">{candidate.email}</div>
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-400">
-                    {candidate.phone_number || "—"}
-                  </td>
                   <td className="px-4 py-3">
                     <VerificationBadge ok={candidate.is_email_verified} label="Email" />
                   </td>
