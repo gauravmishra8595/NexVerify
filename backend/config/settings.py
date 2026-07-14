@@ -90,7 +90,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
@@ -148,7 +147,6 @@ STATICFILES_STORAGE = (
 )
 
 
-
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -200,7 +198,7 @@ DEFAULT_FROM_EMAIL = os.getenv(
     "DEFAULT_FROM_EMAIL",
     EMAIL_HOST_USER,
 )
-
+EMAIL_TIMEOUT = 15
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # --- OTP behaviour ---
@@ -233,4 +231,3 @@ LOGGING = {
 }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-

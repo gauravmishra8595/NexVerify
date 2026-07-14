@@ -1,6 +1,6 @@
 import logging
 import traceback
-
+import socket
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 
@@ -9,6 +9,14 @@ logger = logging.getLogger(__name__)
 
 class EmailSendError(Exception):
     pass
+
+
+logger.info("Resolving SMTP host...")
+logger.info("Resolved IP: %s", socket.gethostbyname(settings.EMAIL_HOST))
+logger.info("EMAIL_HOST=%s", settings.EMAIL_HOST)
+logger.info("EMAIL_PORT=%s", settings.EMAIL_PORT)
+logger.info("EMAIL_HOST_USER=%s", settings.EMAIL_HOST_USER)
+logger.info("DEFAULT_FROM_EMAIL=%s", settings.DEFAULT_FROM_EMAIL)
 
 
 def send_otp_email(
