@@ -586,34 +586,6 @@ Add screenshots of the application below.
 <img src="screenshots/Login.png" width="900">
 </p>
 
-### 📧 OTP Verification
-
-> Add Screenshot
-
----
-
-### 👤 Candidate Dashboard
-
-> Add Screenshot
-
----
-
-### 📝 Assessment Page
-
-> Add Screenshot
-
----
-
-### 📊 Analytics Dashboard
-
-> Add Screenshot
-
----
-
-### 👨‍💼 Admin Dashboard
-
-> Add Screenshot
-
 ---
 
 # 🎯 Future Enhancements
