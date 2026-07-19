@@ -100,15 +100,9 @@ class SubmitAssessmentView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        correct_answers = {
-            q["id"]: q["answer"]
-            for q in session.questions
-        }
+        correct_answers = {q["id"]: q["answer"] for q in session.questions}
 
-        answered = {
-            a["question_id"]: a["selected_option"]
-            for a in answers
-        }
+        answered = {a["question_id"]: a["selected_option"] for a in answers}
 
         score = 0
 
@@ -148,14 +142,10 @@ class SubmitAssessmentView(APIView):
                 )
 
                 if result is None:
-                    result = AssessmentResult.objects.create(
-                        user=request.user
-                    )
+                    result = AssessmentResult.objects.create(user=request.user)
 
                 result.aptitude_score = score
-                result.total_score = (
-                    result.dsa_score + result.aptitude_score
-                )
+                result.total_score = result.dsa_score + result.aptitude_score
                 result.save()
 
         return Response(
@@ -190,9 +180,7 @@ class MyLatestResultView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        return Response(
-            AssessmentResultSerializer(result).data
-        )
+        return Response(AssessmentResultSerializer(result).data)
 
 
 class PreloadAptitudeView(APIView):
@@ -214,14 +202,14 @@ class PreloadAptitudeView(APIView):
             .first()
         )
 
-        if existing:
-            return Response(
-                AssessmentSessionSerializer(existing).data
-            )
+        # Only reuse it if it actually matches the current expected question
+        # count. Otherwise it's a stale session from before a question-count
+        # change (or a partial/corrupted generation) and would keep getting
+        # served forever since it's never marked submitted.
+        if existing and len(existing.questions) == APTITUDE_QUESTION_COUNT:
+            return Response(AssessmentSessionSerializer(existing).data)
 
-        questions = generate_aptitude_questions(
-            count=APTITUDE_QUESTION_COUNT
-        )
+        questions = generate_aptitude_questions(count=APTITUDE_QUESTION_COUNT)
 
         session = AssessmentSession.objects.create(
             user=request.user,
