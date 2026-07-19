@@ -12,6 +12,11 @@ logger = logging.getLogger(__name__)
 genai.configure(api_key=settings.GEMINI_API_KEY)
 _model = genai.GenerativeModel("gemini-2.5-flash")
 
+# Kept well under typical hosting-platform/proxy request timeouts so a slow
+# Gemini call fails fast and falls back to heuristic extraction, instead of
+# hanging until the platform kills the connection with no fallback ever running.
+GEMINI_TIMEOUT_SECONDS = 18
+
 ALLOWED_EXTENSIONS = {".pdf", ".docx"}
 MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
 MIN_EXTRACTED_TEXT_LENGTH = 50  # below this, treat as "couldn't read this resume"
@@ -65,7 +70,9 @@ def extract_text_from_docx(file_obj) -> str:
     # Tables (skills/experience are often laid out in tables in resume templates)
     for table in document.tables:
         for row in table.rows:
-            row_text = " | ".join(cell.text.strip() for cell in row.cells if cell.text.strip())
+            row_text = " | ".join(
+                cell.text.strip() for cell in row.cells if cell.text.strip()
+            )
             if row_text:
                 paragraphs.append(row_text)
 
@@ -112,7 +119,9 @@ def _extract_json_object(raw_text: str) -> dict:
     end = text.rfind("}")
 
     if start == -1 or end == -1 or end <= start:
-        raise ResumeExtractionError("AI response did not contain a parseable JSON object.")
+        raise ResumeExtractionError(
+            "AI response did not contain a parseable JSON object."
+        )
 
     return json.loads(text[start : end + 1])
 
@@ -165,13 +174,51 @@ Resume text:
 """
 
     try:
-        response = _model.generate_content(prompt)
+        response = _model.generate_content(
+            prompt,
+            request_options={"timeout": GEMINI_TIMEOUT_SECONDS},
+        )
         parsed = _extract_json_object(response.text)
         merged = {**_EMPTY_PARSED_DATA, **parsed}
-        return merged
+        return _coerce_parsed_types(merged)
     except Exception:
-        logger.exception("AI resume structuring failed, falling back to heuristic extraction.")
+        logger.exception(
+            "AI resume structuring failed, falling back to heuristic extraction."
+        )
         return _heuristic_extract(raw_text)
+
+
+_LIST_FIELDS = (
+    "education",
+    "skills",
+    "experience",
+    "projects",
+    "certifications",
+    "languages",
+    "frameworks",
+)
+_STRING_FIELDS = ("name", "email", "phone", "cgpa")
+
+
+def _coerce_parsed_types(data: dict) -> dict:
+    """
+    Gemini generally follows the requested shape, but an occasional
+    response substitutes a string/dict for a field that must be a list
+    (or vice versa). Downstream code (e.g. the ATS sanity clamp, which
+    calls len() on skills/experience/projects) assumes these types hold,
+    so normalize here rather than trusting the AI output verbatim.
+    """
+    for field in _LIST_FIELDS:
+        value = data.get(field)
+        if not isinstance(value, list):
+            data[field] = [] if value in (None, "", {}) else [value]
+
+    for field in _STRING_FIELDS:
+        value = data.get(field)
+        if value is not None and not isinstance(value, str):
+            data[field] = str(value)
+
+    return data
 
 
 def _heuristic_extract(raw_text: str) -> dict:
@@ -195,19 +242,50 @@ def _heuristic_extract(raw_text: str) -> dict:
         data["cgpa"] = cgpa_match.group(1)
 
     common_skills = [
-        "Python", "Java", "JavaScript", "TypeScript", "C++", "C", "SQL",
-        "React", "Next.js", "Node.js", "Django", "Flask", "Express",
-        "HTML", "CSS", "Tailwind", "MongoDB", "PostgreSQL", "MySQL",
-        "Git", "Docker", "Kubernetes", "AWS", "Machine Learning",
-        "Data Structures", "Algorithms", "REST API", "GraphQL",
+        "Python",
+        "Java",
+        "JavaScript",
+        "TypeScript",
+        "C++",
+        "C",
+        "SQL",
+        "React",
+        "Next.js",
+        "Node.js",
+        "Django",
+        "Flask",
+        "Express",
+        "HTML",
+        "CSS",
+        "Tailwind",
+        "MongoDB",
+        "PostgreSQL",
+        "MySQL",
+        "Git",
+        "Docker",
+        "Kubernetes",
+        "AWS",
+        "Machine Learning",
+        "Data Structures",
+        "Algorithms",
+        "REST API",
+        "GraphQL",
     ]
-    found_skills = [s for s in common_skills if re.search(rf"\b{re.escape(s)}\b", raw_text, re.IGNORECASE)]
+    found_skills = [
+        s
+        for s in common_skills
+        if re.search(rf"\b{re.escape(s)}\b", raw_text, re.IGNORECASE)
+    ]
     data["skills"] = found_skills
-    data["frameworks"] = [s for s in found_skills if s in (
-        "React", "Next.js", "Django", "Flask", "Express", "Node.js"
-    )]
+    data["frameworks"] = [
+        s
+        for s in found_skills
+        if s in ("React", "Next.js", "Django", "Flask", "Express", "Node.js")
+    ]
 
     common_languages = ["English", "Hindi", "Spanish", "French", "German", "Mandarin"]
-    data["languages"] = [l for l in common_languages if re.search(rf"\b{l}\b", raw_text, re.IGNORECASE)]
+    data["languages"] = [
+        l for l in common_languages if re.search(rf"\b{l}\b", raw_text, re.IGNORECASE)
+    ]
 
     return data

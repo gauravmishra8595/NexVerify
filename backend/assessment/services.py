@@ -13,6 +13,13 @@ genai.configure(api_key=settings.GEMINI_API_KEY)
 
 _model = genai.GenerativeModel("gemini-2.5-flash")
 
+# Generating 25 questions can occasionally run long. Cap it well under
+# typical hosting-platform/proxy request timeouts (usually 30s) so a slow
+# Gemini call fails fast and falls back to the static bank, instead of
+# hanging until the platform kills the connection with a 502/504 and no
+# fallback ever runs.
+GEMINI_TIMEOUT_SECONDS = 18
+
 
 class QuestionGenerationError(Exception):
     pass
@@ -47,12 +54,16 @@ def _extract_json_array(raw_text: str) -> list:
     end = text.rfind("]")
 
     if start == -1 or end == -1 or end <= start:
-        raise QuestionGenerationError("AI response did not contain a parseable JSON array.")
+        raise QuestionGenerationError(
+            "AI response did not contain a parseable JSON array."
+        )
 
     try:
         return json.loads(text[start : end + 1])
     except json.JSONDecodeError as exc:
-        raise QuestionGenerationError(f"Could not parse AI response as JSON: {exc}") from exc
+        raise QuestionGenerationError(
+            f"Could not parse AI response as JSON: {exc}"
+        ) from exc
 
 
 def _normalize_questions(raw_questions: list) -> list[dict]:
@@ -75,13 +86,15 @@ def _normalize_questions(raw_questions: list) -> list[dict]:
             if not question_text or len(options) < 2 or answer not in options:
                 continue
 
-            normalized.append({
-                "id": i + 1,
-                "question": question_text,
-                "options": options,
-                "answer": answer,
-                "difficulty": difficulty,
-            })
+            normalized.append(
+                {
+                    "id": i + 1,
+                    "question": question_text,
+                    "options": options,
+                    "answer": answer,
+                    "difficulty": difficulty,
+                }
+            )
         except (KeyError, TypeError):
             continue
 
@@ -109,7 +122,10 @@ The "answer" must be an exact, verbatim match of one of the strings in "options"
 """
 
     try:
-        response = _model.generate_content(prompt)
+        response = _model.generate_content(
+            prompt,
+            request_options={"timeout": GEMINI_TIMEOUT_SECONDS},
+        )
         raw_questions = _extract_json_array(response.text)
         questions = _normalize_questions(raw_questions)
 
@@ -118,7 +134,9 @@ The "answer" must be an exact, verbatim match of one of the strings in "options"
 
         return questions[:count]
     except Exception:
-        logger.exception("DSA question generation failed, falling back to static question bank.")
+        logger.exception(
+            "DSA question generation failed, falling back to static question bank."
+        )
         return FALLBACK_DSA_QUESTIONS[:count]
 
 
@@ -144,7 +162,10 @@ The "answer" must be an exact, verbatim match of one of the strings in "options"
 """
 
     try:
-        response = _model.generate_content(prompt)
+        response = _model.generate_content(
+            prompt,
+            request_options={"timeout": GEMINI_TIMEOUT_SECONDS},
+        )
         raw_questions = _extract_json_array(response.text)
         questions = _normalize_questions(raw_questions)
 
@@ -153,5 +174,7 @@ The "answer" must be an exact, verbatim match of one of the strings in "options"
 
         return questions[:count]
     except Exception:
-        logger.exception("Aptitude question generation failed, falling back to static question bank.")
+        logger.exception(
+            "Aptitude question generation failed, falling back to static question bank."
+        )
         return FALLBACK_APTITUDE_QUESTIONS[:count]
